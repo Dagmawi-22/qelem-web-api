@@ -1,0 +1,414 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==================== ENUMS ====================
+
+enum AttributeType {
+  STRING
+  NUMBER
+  BOOLEAN
+  DATE
+  DROPDOWN
+  EDUCATION_LEVEL
+  SPECIALTY
+  LANGUAGE
+}
+
+enum AppointmentStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+  COMPLETED
+}
+
+enum UserRole {
+  ADMIN
+  PATIENT
+  PHYSICIAN
+}
+
+enum OTPType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  PHONE_VERIFICATION
+}
+
+enum QuestionType {
+  TEXT
+  MULTIPLE_CHOICE
+  CHECKBOX
+  DROPDOWN
+  RATING
+  DATE
+}
+
+enum UserLang {
+  ENG
+  AM
+}
+
+enum InterestedIn {
+  SPIRITUAL_HEALERS
+  THERAPISTS
+}
+
+// ==================== AUTH & USERS ====================
+
+model User {
+  id             String   @id @default(cuid())
+  username       String?  @unique
+  email          String?  @unique
+  phoneNumber    String   @unique
+  password       String
+  role           UserRole @default(PATIENT)
+  isAnonymous    Boolean  @default(false)
+  lastLogin      DateTime?
+  isFirstTime    Boolean   @default(true)
+  verifiedAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+  lang           UserLang    @default(ENG)
+
+  // Relations
+  patient        Patient?
+  physician      Physician?
+  otp            OTP[]
+  userAttributes UserAttribute[]
+  onboardingAnswers OnboardingAnswer[]
+  topicMemberships TopicGroupMember[]
+  posts          Post[]
+  comments       Comment[]
+}
+
+model OTP {
+  id          String   @id @default(cuid())
+  userId      String
+  type        OTPType
+  code        String
+  expiresAt   DateTime
+  isUsed      Boolean   @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, type])
+}
+
+model Patient {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  dateOfBirth   DateTime?
+  gender        String?
+  address       String?
+  emergencyContact String?
+  medicalHistory String?
+  anonymousName String?
+  firstName     String?
+  lastName      String?
+  isAnonymous   Boolean  @default(false)
+  interestedIn InterestedIn  @default(THERAPISTS)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  // Relations
+  user          User     @relation(fields: [userId], references: [id])
+  ratings       Rating[]
+  appointments  Appointment[]
+  sessions      Session[]
+}
+
+model Rating {
+  id        String   @id @default(uuid())
+  rating    Int      // or Float if you want decimal ratings
+  review    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  patientId String
+  patient   Patient     @relation(fields: [patientId], references: [id])
+
+  physicianId String
+  physician   Physician? @relation(fields: [physicianId], references: [id])
+}
+
+
+model Physician {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  specialization String?
+  qualifications String?
+  experience    Int?     // Years of experience
+  biography     String?
+  licenseNumber String?
+  firstName     String
+  lastName      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+  averageRating Float? @default(0.0)
+  ratingsCount  Int?   @default(0)
+
+  // Relations
+  user          User     @relation(fields: [userId], references: [id])
+  appointments  Appointment[]
+  ratings       Rating[]
+  sessions      Session[]
+  availabilities PhysicianAvailability[]
+  categories  PhysicianCategory[]
+}
+
+model PhysicianCategory {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?
+  active      Boolean      @default(true) 
+  createdAt   DateTime     @default(now()) 
+  updatedAt   DateTime     @updatedAt  
+  deletedAt   DateTime?    
+
+  physicians  Physician[] 
+}
+
+model UserAttribute {
+  id          String   @id @default(cuid())
+  userId      String
+  attributeId String
+  value       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  // Relations
+  user        User     @relation(fields: [userId], references: [id])
+  attribute   Attribute @relation(fields: [attributeId], references: [id])
+}
+
+// ==================== APPOINTMENTS & SESSIONS ====================
+
+model Appointment {
+  id          String   @id @default(cuid())
+  patientId   String
+  physicianId String
+  dateTime    DateTime
+  duration    Int      // Duration in minutes
+  reason      String?
+  status      AppointmentStatus @default(PENDING)
+  cancelReason String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  // Relations
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  physician   Physician @relation(fields: [physicianId], references: [id])
+  session     Session?
+}
+
+model Session {
+  id             String   @id @default(cuid())
+  appointmentId  String   @unique
+  startTime      DateTime
+  endTime        DateTime?
+  notes          String?
+  summary        String?
+  followUpNeeded Boolean  @default(false)
+  status      AppointmentStatus @default(PENDING)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  // Relations
+  appointment    Appointment @relation(fields: [appointmentId], references: [id])
+  audioCalls     SessionAudioCall[]
+  videoCalls     SessionVideoCall[]
+  patient        Patient  @relation(fields: [patientId], references: [id])
+  physician      Physician @relation(fields: [physicianId], references: [id])
+  patientId      String
+  physicianId    String
+}
+
+model SessionAudioCall {
+  id          String   @id @default(cuid())
+  sessionId   String
+  startTime   DateTime
+  endTime     DateTime?
+  recordingUrl String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  // Relations
+  session     Session  @relation(fields: [sessionId], references: [id])
+}
+
+model SessionVideoCall {
+  id          String   @id @default(cuid())
+  sessionId   String
+  startTime   DateTime
+  endTime     DateTime?
+  recordingUrl String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  // Relations
+  session     Session  @relation(fields: [sessionId], references: [id])
+}
+
+model PhysicianAvailability {
+  id          String   @id @default(cuid())
+  physicianId String
+  dayOfWeek   Int?     // 0=Sunday, 1=Monday, etc.
+  startTime   DateTime
+  endTime     DateTime
+  isRecurring Boolean   @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  // Relations
+  physician   Physician @relation(fields: [physicianId], references: [id])
+}
+
+// ==================== COMMUNITY & TOPIC GROUPS ====================
+
+model TopicGroup {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isPrivate   Boolean   @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+// GROUP CATEGORY TO BE ADDED
+  // Relations
+  members     TopicGroupMember[]
+  posts       Post[]
+}
+
+model TopicGroupMember {
+  id          String   @id @default(cuid())
+  topicGroupId String
+  userId      String
+  isAdmin     Boolean   @default(false)
+  joinedAt    DateTime @default(now())
+  
+  // Relations
+  topicGroup  TopicGroup @relation(fields: [topicGroupId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@unique([topicGroupId, userId])
+}
+
+model Post {
+  id          String   @id @default(cuid())
+  topicGroupId String
+  userId      String
+  title       String
+  content     String
+  isAnonymous Boolean   @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  // Relations
+  topicGroup  TopicGroup @relation(fields: [topicGroupId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+  comments    Comment[]
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  postId      String
+  userId      String
+  content     String
+  isAnonymous Boolean   @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  // Relations
+  post        Post     @relation(fields: [postId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+// ==================== SYSTEM ATTRIBUTES & ONBOARDING ====================
+
+model Attribute {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  displayName String
+  type        AttributeType
+  description String?
+  options     Json?     // For dropdown options stored as array
+  isSystem    Boolean   @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  // Relations
+  userAttributes UserAttribute[]
+}
+
+model OnboardingQuestionnaire {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  userRole    UserRole // Which user type this questionnaire is for
+  isActive    Boolean   @default(true)
+  orderIndex  Int       @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  // Relations
+  questions   OnboardingQuestion[]
+}
+
+model OnboardingQuestion {
+  id                     String   @id @default(cuid())
+  questionnaireId        String
+  question               String
+  description            String?
+  userType               UserRole @default(PATIENT)   
+  type                   QuestionType
+  isRequired             Boolean @default(false)
+  options                Json?  // For multiple choice questions
+  orderIndex             Int     @default(0)
+  dependsOnQuestionId    String?
+  dependsOnAnswerValue   String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  deletedAt              DateTime?
+
+  // Relations
+  questionnaire          OnboardingQuestionnaire @relation(fields: [questionnaireId], references: [id])
+  dependsOnQuestion      OnboardingQuestion?     @relation("QuestionDependency", fields: [dependsOnQuestionId], references: [id])
+  dependentQuestions     OnboardingQuestion[]    @relation("QuestionDependency")
+  answers                OnboardingAnswer[]
+}
+
+model OnboardingAnswer {
+  id          String   @id @default(cuid())
+  userId      String
+  questionId  String
+  answer      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user        User      @relation(fields: [userId], references: [id])
+  question    OnboardingQuestion @relation(fields: [questionId], references: [id])
+}
