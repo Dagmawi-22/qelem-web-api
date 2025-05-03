@@ -1,0 +1,64 @@
+import { Injectable } from '@nestjs/common';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import * as pdf from 'pdf-parse';
+
+@Injectable()
+export class AiGeneratorService {
+  private genAI: GoogleGenerativeAI;
+
+  constructor() {
+    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  }
+
+  async extractTextFromPdf(buffer: Buffer): Promise<string> {
+    const data = await pdf(buffer);
+    return data.text;
+  }
+
+  async generateExamQuestions(text: string, count: number, difficulty: string): Promise<any[]> {
+    const model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+    
+    const prompt = `
+    Generate ${count} ${difficulty}-difficulty multiple choice questions based on the following text.
+    Each question should have 4 options with exactly one correct answer.
+    Return as a JSON array where each item has:
+    - question: string
+    - options: array of { value: string (A-D), text: string, correct: boolean }
+
+    Text:
+    ${text}
+
+    Return only valid JSON:`;
+    
+    const result = await model.generateContent(prompt);
+    return this.parseJsonResponse(result.response.text());
+  }
+
+  async generateFlashcards(text: string, count: number): Promise<any[]> {
+    const model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+    
+    const prompt = `
+    Generate ${count} flashcard pairs (front/back) based on the following text.
+    Front should be a question/term, back should be the answer/definition.
+    Return as a JSON array where each item has:
+    - front: string
+    - back: string
+
+    Text:
+    ${text}
+
+    Return only valid JSON:`;
+    
+    const result = await model.generateContent(prompt);
+    return this.parseJsonResponse(result.response.text());
+  }
+
+  private parseJsonResponse(text: string): any[] {
+    try {
+      const jsonString = text.replace(/```json|```/g, '').trim();
+      return JSON.parse(jsonString);
+    } catch (e) {
+      throw new Error('Failed to parse AI response');
+    }
+  }
+}
