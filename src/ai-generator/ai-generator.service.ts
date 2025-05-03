@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import * as pdf from 'pdf-parse';
+import pdf from 'pdf-parse';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AiGeneratorService {
   private genAI: GoogleGenerativeAI;
+  private prisma = new PrismaService();
 
   constructor() {
     this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -15,9 +17,13 @@ export class AiGeneratorService {
     return data.text;
   }
 
-  async generateExamQuestions(text: string, count: number, difficulty: string): Promise<any[]> {
-    const model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
-    
+  async generateExamQuestions(
+    text: string,
+    count: number,
+    difficulty: string,
+  ): Promise<any[]> {
+    const model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+
     const prompt = `
     Generate ${count} ${difficulty}-difficulty multiple choice questions based on the following text.
     Each question should have 4 options with exactly one correct answer.
@@ -29,14 +35,14 @@ export class AiGeneratorService {
     ${text}
 
     Return only valid JSON:`;
-    
+
     const result = await model.generateContent(prompt);
     return this.parseJsonResponse(result.response.text());
   }
 
   async generateFlashcards(text: string, count: number): Promise<any[]> {
-    const model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
-    
+    const model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+
     const prompt = `
     Generate ${count} flashcard pairs (front/back) based on the following text.
     Front should be a question/term, back should be the answer/definition.
@@ -48,7 +54,7 @@ export class AiGeneratorService {
     ${text}
 
     Return only valid JSON:`;
-    
+
     const result = await model.generateContent(prompt);
     return this.parseJsonResponse(result.response.text());
   }
@@ -60,5 +66,23 @@ export class AiGeneratorService {
     } catch (e) {
       throw new Error('Failed to parse AI response');
     }
+  }
+
+  async getExamById(id: string) {
+    const exam = await this.prisma.exam.findUnique({
+      where: { id },
+      include: { questions: { include: { options: true } } },
+    });
+    if (!exam) throw new NotFoundException('Exam not found');
+    return exam;
+  }
+
+  async getDeckById(id: string) {
+    const deck = await this.prisma.deck.findUnique({
+      where: { id },
+      include: { flashcards: true },
+    });
+    if (!deck) throw new NotFoundException('Deck not found');
+    return deck;
   }
 }
