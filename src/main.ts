@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-// import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import * as express from 'express';
 import { join } from 'path';
@@ -35,8 +34,8 @@ async function bootstrap() {
   const port = 8000;
 
   const config = new DocumentBuilder()
-    .setTitle('Safe Space API')
-    .setDescription('API description for the safe space application')
+    .setTitle('QELEM WEB API')
+    .setDescription('API description for the qelem web application')
     .setVersion('1.0')
     .addBearerAuth(
       {
