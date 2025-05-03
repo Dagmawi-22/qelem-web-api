@@ -1,5 +1,10 @@
 {
-  "name": "nest-typescript-starter",
+  "name": "qelem-web-api",
+  "author": {
+    "name": "Dagmawi Teka",
+    "email": "dagmawi.teka22@gmail.com",
+    "github": "https://github.com/Dagmawi-22"
+  },
   "private": true,
   "version": "1.0.0",
   "description": "Nest TypeScript starter repository",
@@ -22,7 +27,6 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^3.3.0",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/swagger": "^8.1.0",
@@ -32,8 +36,6 @@
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
-    "passport": "^0.7.0",
-    "passport-jwt": "^4.0.1",
     "prisma": "^6.0.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.5.5",
