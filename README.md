@@ -63,13 +63,25 @@ The extracted content is sent to the Gemini API to generate either:
    - Study scheduler & with notifications
    - Personalization of learning content & studying user behaviour
 
-## Installation
-
-### Pre requesties
-##### 
-- M
-
-## Installation
+## ⚙️ Installation (Docker)
+ ### Clone the repository
+     ``` git clone https://github.com/Dagmawi-22/qelem-web-api.git ```
+     ``` cd qelem-web-api ```
+ ### Create a .env file if it doesn't exist based on .env.example:
+     ```
+    DATABASE_URL="postgresql://user:password@host:port/db"
+    JWT_SECRET="dummy-jwt-secret"
+    GEMINI_API_KEY="gemini-api-key"
+    MAX_FILE_SIZE=1048576
+     ```
+ ### Start the application with Docker:
+     ```
+    docker-compose up --build
+     ```
+ ### After the containers are up, run your migration command inside the app container::
+     ```
+    docker exec -it qelem-api npm run migration:run
+     ```
 
 ### 🤝 Contributing
 ##### Contributions are welcome! If you have ideas for improvements, bug fixes, or new features, feel free to fork the repository and submit a pull request. For major changes, please open an issue first to discuss what you’d like to add.
