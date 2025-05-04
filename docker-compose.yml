@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    container_name: qelem-api
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://postgres:password@postgres:5432/mydb
+    ports:
+      - '3000:3000'
+    networks:
+      - nest-network
+
+  postgres:
+    image: postgres:15
+    container_name: pg-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - nest-network
+
+volumes:
+  pgdata:
+
+networks:
+  nest-network:
+    driver: bridge
