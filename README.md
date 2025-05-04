@@ -15,12 +15,10 @@ A robust NestJS API that converts static PDFs into:
 ## Table of Contents
 - [Features](#-features)
 - [Installation](#-installation)
-- [API Documentation](#-api-documentation)
-- [Development](#-development)
 - [Contributing](#-contributing)
 - [License](#-license)
 
-## 🌟 Features
+## Features
 
 ### PDF Processing
 ##### 
@@ -41,12 +39,41 @@ A robust NestJS API that converts static PDFs into:
 - Content Generation via Gemini API
 The extracted content is sent to the Gemini API to generate either:
 
-A deck of flashcards, or
+ A deck of flashcards, or
 
-A structured set of exam questions
+ A structured set of exam questions
 
-Output Formatting & Saving
-The generated content is formatted in a predefined structure and saved as a JSON file.
+ Output Formatting & Saving
+ The generated content is formatted in a predefined structure and saved as a JSON file.
 
-Download/Return Result
-The final output file is returned to the user for access.
+ Download/Return Result
+ The final output file is returned to the user for access.
+
+### Social Sharing
+##### 
+- The user generates the desired learning content (exam or deck of cards).
+
+- The user selects a social platform to share to from frontend or copy the content link & shares it to others.
+
+- Api will return the specific content parsing it from the shared url.
+
+### To be added:
+   - Adding popular pdf materials
+   - Progress tracking for a user
+   - Study scheduler & with notifications
+   - Personalization of learning content & studying user behaviour
+
+## Installation
+
+### Pre requesties
+##### 
+- M
+
+## Installation
+
+### 🤝 Contributing
+##### Contributions are welcome! If you have ideas for improvements, bug fixes, or new features, feel free to fork the repository and submit a pull request. For major changes, please open an issue first to discuss what you’d like to add.
+
+### 🔒 License
+##### Do whatever you want with it — learn from it, build on it, break it, remix it. Just don’t be shady. A little credit is always appreciated. ✌️
+
