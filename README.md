@@ -23,9 +23,30 @@ A robust NestJS API that converts static PDFs into:
 ## 🌟 Features
 
 ### PDF Processing
-```typescript
-interface PDFProcessingFeatures {
-  textExtraction: 'accurate' | 'fast';
-  structureAnalysis: boolean;
-  imageHandling: 'extract' | 'ignore';
-}
+##### 
+- The user uploads a PDF document containing learning material.
+
+- Input Parameters
+    The user specifies:
+
+- Maximum number of questions desired
+
+- Difficulty level (easy, medium, or hard)
+
+- Content type: flashcards or exam
+
+- Content Extraction
+ The system extracts raw text from the PDF.
+
+- Content Generation via Gemini API
+The extracted content is sent to the Gemini API to generate either:
+
+A deck of flashcards, or
+
+A structured set of exam questions
+
+Output Formatting & Saving
+The generated content is formatted in a predefined structure and saved as a JSON file.
+
+Download/Return Result
+The final output file is returned to the user for access.
