@@ -3,7 +3,14 @@
   "builds": [
     {
       "src": "src/main.ts",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "maxLambdaSize": "50mb",
+        "includeFiles": [
+          "node_modules/pdf-parse/**",
+          "node_modules/pdf-lib/**"
+        ]
+      }
     }
   ],
   "routes": [
@@ -16,5 +23,9 @@
       "dest": "src/main.ts"
     }
   ],
-  "buildCommand": "npm run vercel-build"
+  "buildCommand": "npm install && npm run build",
+  "env": {
+    "NODE_ENV": "production",
+    "NODE_OPTIONS": "--experimental-vm-modules"
+  }
 }
