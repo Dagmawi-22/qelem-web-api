@@ -13,8 +13,19 @@ export class AiGeneratorService {
   }
 
   async extractTextFromPdf(buffer: Buffer): Promise<string> {
-    const data = await pdf(buffer);
-    return data.text;
+    try {
+      const { default: pdf } = await import('pdf-parse');
+      const data = await pdf(buffer);
+
+      if (!data.text) {
+        throw new Error('PDF contained no extractable text');
+      }
+
+      return data.text;
+    } catch (error) {
+      console.error('PDF Processing Error:', error);
+      throw new Error(`Failed to process PDF: ${error.message}`);
+    }
   }
 
   async generateExamQuestions(
