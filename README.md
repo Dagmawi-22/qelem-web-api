@@ -10,7 +10,7 @@ A robust NestJS API that converts static PDFs into:
 - Anki-compatible flashcard decks 🗂️
 - Structured study guides 📚
 
-**Frontend Companion**: [pdf-learning-ui](https://github.com/Dagmawi-22/qelem) (SvelteKit + TailwindCSS)
+**Frontend Companion**: [qelem-web](https://github.com/Dagmawi-22/qelem-web) (SvelteKit + TailwindCSS)
 
 ## Table of Contents
 - [Features](#-features)
