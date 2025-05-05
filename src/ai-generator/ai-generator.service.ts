@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import pdf from 'pdf-parse';
+import * as pdf from 'pdf-parse';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -22,7 +22,9 @@ export class AiGeneratorService {
     count: number,
     difficulty: string,
   ): Promise<any[]> {
-    const model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = this.genAI.getGenerativeModel({
+      model: 'gemini-1.5-pro-latest',
+    });
 
     const prompt = `
     Generate ${count} ${difficulty}-difficulty multiple choice questions based on the following text.
