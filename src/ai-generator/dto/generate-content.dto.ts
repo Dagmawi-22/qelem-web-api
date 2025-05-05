@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
 
 export enum ContentType {
   EXAM = 'exam',
@@ -16,6 +16,7 @@ export enum DifficultyLevel {
 export class GenerateContentDto {
   @ApiProperty({
     enum: ContentType,
+    enumName: 'ContentType',
     description: 'Type of content to generate',
     example: ContentType.EXAM,
   })
@@ -24,24 +25,28 @@ export class GenerateContentDto {
 
   @ApiPropertyOptional({
     enum: DifficultyLevel,
+    enumName: 'DifficultyLevel',
     description: 'Difficulty level of the content',
     example: DifficultyLevel.MEDIUM,
+    default: DifficultyLevel.MEDIUM,
   })
   @IsOptional()
   @IsEnum(DifficultyLevel)
-  difficulty?: DifficultyLevel;
+  difficulty: DifficultyLevel = DifficultyLevel.MEDIUM;
 
   @ApiPropertyOptional({
     type: Number,
-    minimum: 1,
-    maximum: 50,
-    description: 'Number of items to generate (1–50)',
+    description: 'Number of items to generate (5-20)',
     example: 10,
+    minimum: 5,
+    maximum: 20,
+    default: 10,
   })
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   @Min(5)
   @Max(20)
-  @Transform(({ value }) => parseInt(value, 10))
-  count?: number;
+  @Type(() => Number)
+  @Transform(({ value }) => (value ? parseInt(value, 10) : 10))
+  count: number = 10;
 }
