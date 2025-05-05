@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 export enum ContentType {
@@ -39,7 +40,8 @@ export class GenerateContentDto {
   })
   @IsOptional()
   @IsNumber()
-  @Min(1)
-  @Max(50)
+  @Min(5)
+  @Max(20)
+  @Transform(({ value }) => parseInt(value, 10))
   count?: number;
 }
