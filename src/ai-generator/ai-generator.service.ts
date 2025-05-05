@@ -43,7 +43,9 @@ export class AiGeneratorService {
   }
 
   async generateFlashcards(text: string, count: number): Promise<any[]> {
-    const model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = this.genAI.getGenerativeModel({
+      model: 'gemini-1.5-pro-latest',
+    });
 
     const prompt = `
     Generate ${count} flashcard pairs (front/back) based on the following text.
