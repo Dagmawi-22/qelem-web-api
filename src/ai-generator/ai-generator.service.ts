@@ -22,7 +22,9 @@ export class AiGeneratorService {
     count: number,
     difficulty: string,
   ): Promise<any[]> {
-    const model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = this.genAI.getGenerativeModel({
+      model: 'gemini-1.5-pro-latest',
+    });
 
     const prompt = `
     Generate ${count} ${difficulty}-difficulty multiple choice questions based on the following text.
