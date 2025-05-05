@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import pdf from 'pdf-parse';
+import * as pdf from 'pdf-parse';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
